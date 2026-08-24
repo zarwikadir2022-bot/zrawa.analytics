@@ -5,105 +5,73 @@ from folium import plugins
 
 # إعداد صفحة التطبيق
 st.set_page_config(
-    page_title="منصة التحليل الشمولي - الزراوة، قابس",
+    page_title="منصة التحليل الجغرافي - الزراوة، قابس",
     page_icon="🌍",
     layout="wide"
 )
 
-# عنوان رئيسي واحترافي
 st.title("🌍 منصة التحليل الجغرافي والشمولي - الزراوة (قابس، تونس)")
-st.markdown("لوحة تحكم متقدمة لاستعراض صور الأقمار الصناعية، تحليل التضاريس، وقياس المسافات الميدانية.")
+st.markdown("لوحة تحكم تفاعلية لاستعراض صور الأقمار الصناعية وقياس المسافات الميدانية.")
 
-# الشريط الجانبي للإعدادات والتحكم
-st.sidebar.header("🎛️ إعدادات التحليل")
-analysis_mode = st.sidebar.selectbox(
-    "اختر نوع الطبقة الأساسية:",
-    ["أقمار صناعية عالية الدقة (Esri)", "خرائط الشوارع (OpenStreetMap)", "التضاريس الهضبية"]
+# إعدادات الشريط الجانبي
+st.sidebar.header("🎛️ خيارات العرض")
+map_style = st.sidebar.selectbox(
+    "اختر نوع الخريطة الأساسية:",
+    ["أقمار صناعية عالية الدقة (Esri)", "خرائط الشوارع (OpenStreetMap)"]
 )
 
-# تحديد الإحداثيات الأساسية للزراوة
+# إحداثيات الزراوة (قابس، تونس)
 zrawa_coords = [33.3426, 9.4926]
 
-# خيارات إضافية للشريط الجانبي
-show_marker = st.sidebar.checkbox("إظهار علامة موقع الزراوة القديمة", value=True)
-add_drawing = st.sidebar.checkbox("تفعيل أدوات الرسم وتحديد المضلعات", value=True)
-zoom_level = st.sidebar.slider("مستوى التقريب (Zoom Level)", min_value=10, max_value=19, value=15)
-
-# إنشاء الخريطة بناءً على اختيار المستخدم
-if analysis_mode == "أقمار صناعية عالية الدقة (Esri)":
+# تحديد نوع التايلز (Tiles)
+if map_style == "أقمار صناعية عالية الدقة (Esri)":
     tiles_choice = 'Esri.WorldImagery'
-elif analysis_mode == "خرائط الشوارع (OpenStreetMap)":
-    tiles_choice = 'openstreetmap'
 else:
-    tiles_choice = 'Stamen Terrain'
+    tiles_choice = 'openstreetmap'
 
+# إنشاء الخريطة
 m = folium.Map(
     location=zrawa_coords,
-    zoom_start=zoom_level,
+    zoom_start=15,
     tiles=tiles_choice
 )
 
-# إضافة طبقات إضافية للتبديل السريع
+# إضافة طبقة بديلة لقمر صناعي أو شوارع
 folium.TileLayer('Esri.WorldImagery', name='أقمار صناعية').add_to(m)
 folium.TileLayer('openstreetmap', name='شوارع').add_to(m)
 
-# إضافة علامة الموقع إذا تم تفعيلها
-if show_marker:
-    popup_content = """
-    <div style="font-family: Arial; width: 220px; direction: rtl;">
-        <h4 style="color: #d9534f; margin-bottom: 5px;">الزراوة القديمة، قابس</h4>
-        <p><b>الإحداثيات:</b> 33.3426° N, 9.4926° E</p>
-        <p><b>الخصائص:</b> قرية جبلية قديمة، مساكن حفرية، وتضاريس وعرة.</p>
-    </div>
-    """
-    folium.Marker(
-        location=zrawa_coords,
-        popup=folium.Popup(popup_content, max_width=300),
-        tooltip="مركز الزراوة",
-        icon=folium.Icon(color='red', icon='home', prefix='fa')
-    ).add_to(m)
+# علامة موقع الزراوة
+popup_content = """
+<div style="font-family: Arial; width: 200px; direction: rtl;">
+    <h4 style="color: #d9534f; margin-bottom: 5px;">الزراوة القديمة</h4>
+    <p><b>الإحداثيات:</b> 33.3426° N, 9.4926° E</p>
+</div>
+"""
+folium.Marker(
+    location=zrawa_coords,
+    popup=folium.Popup(popup_content, max_width=250),
+    tooltip="مركز الزراوة",
+    icon=folium.Icon(color='red', icon='home', prefix='fa')
+).add_to(m)
 
-# إضافة أدوات القياس المتقدمة وملء الشاشة
+# إضافة أدوات القياس وملء الشاشة
 m.add_child(plugins.MeasureControl(position='topleft', primary_length_unit='meters'))
 m.add_child(plugins.Fullscreen())
-
-# إضافة أدوات الرسم إذا تم تفعيلها
-if add_drawing:
-    draw = plugins.Draw(
-        export=True,
-        position='topleft',
-        draw_options={'polyline': True, 'polygon': True, 'rectangle': True, 'circle': True, 'marker': True},
-        edit_options={'edit': True}
-    )
-    m.add_child(draw)
-
-# تفعيل التحكم بالطبقات
 folium.LayerControl().add_to(m)
 
-# عرض الخريطة داخل تطبيق Streamlit
-st.markdown("---")
+# تقسيم الشاشة وعرض الخريطة باستخدام st_folium بشكل آمن
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.subheader("🗺️ الخريطة التفاعلية للمنطقة")
-    # عرض الخريطة وجلب بيانات التفاعل
-    map_data = st_folium(m, width=800, height=600)
+    st.subheader("🗺️ الخريطة التفاعلية")
+    # استدعاء الخريطة مع تحديد العرض والارتفاع لضمان عدم توقفها
+    st_folium(m, width=700, height=550)
 
 with col2:
-    st.subheader("📊 لوحة المعلومات")
-    st.info("قم بتحريك الخريطة أو التكبير لاستكشاف سفح الجبل والمحيط الجغرافي للزراوة.")
-    
-    # معلومات تحليلية إضافية سريعة
+    st.subheader("📊 معلومات الموقع")
+    st.info("الزراوة (قابس، تونس): منطقة جبلية عريقة تتميز بتضاريسها الصخرية ومساكنها الحفرية.")
     st.markdown("""
-    * **المنطقة الإدارية:** مطماطة الجديدة، قابس.
-    * **الارتفاع الجغرافي:** منطقة جبلية مرتفعة.
-    * **الأدوات المتاحة:**
-        * قياس المسافات الميدانية بالأمتار.
-        * تحديد مضلعات ورسم مسارات.
-        * حفظ المخرجات الجغرافية.
+    * **خط العرض:** 33.3426° N
+    * **خط الطول:** 9.4926° E
+    * **الأداة:** قياس المسافات بالأمتار متاحة أعلى الخريطة.
     """)
-
-# قسم إضافي لتحليلات قادمة
-st.markdown("---")
-st.subheader("⚙️ الخطوات التطويرية القادمة للتحليل الشمولي:")
-st.write("يمكننا لاحقاً ربط هذا التطبيق بـ APIs خاصة بسحب مؤشرات الغطاء النباتي (NDVI) ومقارنة صور الأقمار الصناعية تاريخياً بشكل آلي مباشر من داخل هذه المنصة.")
