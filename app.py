@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 st.title("🗺️ المنصة الذكية للتحليل الجغرافي والجيوفيزيائي الشامل")
-st.markdown("لوحة تحكم ديناميكية تتيح إدخال أي إحداثيات أو منطقة في العالم، مع توليد خرائط حرارية وتحليل نصي معمق.")
+st.markdown("لوحة تحكم ديناميكية تتيح إدخال الإحداثيات، استعراض طبقات خرائط متعددة (أقمار صناعية، شوارع، حرارة)، وتحديد نطاقات المسح.")
 
 # قائمة بالمناطق المتاحة أو إمكانية إدخال منطقة حرة بالكامل
 st.sidebar.header("📍 إعدادات الموقع والإحداثيات")
@@ -38,6 +38,14 @@ else:
     target_coords = [32.9297, 10.4518]
 
 st.sidebar.markdown("---")
+st.sidebar.header("🗺️ خيارات طبقات الخريطة")
+# اختيار نوع الخريطة من الشريط الجانبي (بما فيها خريطة الشوارع والمدن الجديدة)
+map_style = st.sidebar.selectbox(
+    "اختر نوع الخريطة الأساسية:",
+    ["صور الأقمار الصناعية (Esri Imagery)", "خريطة الشوارع والمدن (OpenStreetMap)", "خريطة التضاريس (OpenTopoMap)"]
+)
+
+st.sidebar.markdown("---")
 st.sidebar.header("🔬 إعدادات مسح الشذوذ والعمق")
 anomaly_type = st.sidebar.selectbox(
     "نوع الشذوذ المستهدف للتحليل:",
@@ -45,12 +53,23 @@ anomaly_type = st.sidebar.selectbox(
 )
 sensitivity = st.sidebar.slider("معامل الحساسية الطيفية والحرارية:", 50, 99, 88)
 
-# إنشاء الخريطة باستخدام Folium الصافية
+# تحديد الـ Tiles بناءً على اختيار المستخدم
+if "الأقمار الصناعية" in map_style:
+    tiles_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+    tiles_attr = 'Esri World Imagery'
+elif "الشوارع" in map_style:
+    tiles_url = 'openstreetmap'
+    tiles_attr = 'OpenStreetMap Contributors'
+else:
+    tiles_url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+    tiles_attr = 'OpenTopoMap'
+
+# إنشاء الخريطة
 m = folium.Map(
     location=target_coords,
     zoom_start=15,
-    tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attr='Esri World Imagery'
+    tiles=tiles_url,
+    attr=tiles_attr
 )
 
 # علامة الموقع الرئيسي
@@ -71,16 +90,25 @@ for _ in range(30):
     heat_data.append([target_coords[0] + lat_offset, target_coords[1] + lon_offset, intensity])
 
 HeatMap(heat_data, radius=20, blur=14, max_zoom=1).add_to(m)
+
+# إضافة أداة الرسم لتحديد نطاق أو مضلع مسح على الخريطة
+draw = Draw(
+    export=True,
+    position='topleft',
+    draw_options={'polyline': False, 'polygon': True, 'rectangle': True, 'circle': True, 'marker': True},
+    edit_options={'edit': True}
+)
+m.add_child(draw)
 Fullscreen().add_to(m)
 
 # عرض واجهة التطبيق مقسمة
 col1, col2 = st.columns([1.8, 1.2])
 
 with col1:
-    st.subheader(f"🗺️ خريطة الاستكشاف الحراري لـ: {site_name}")
-    st.info(f"📍 الإحداثيات الحالية: ({target_coords[0]}, {target_coords[1]})")
+    st.subheader(f"🗺️ خريطة الاستكشاف والتحديد لـ: {site_name}")
+    st.info(f"📍 الإحداثيات الحالية: ({target_coords[0]}, {target_coords[1]}) - استخدم أدوات الرسم أعلى الخريطة لتحديد نطاق المسح الميداني.")
     
-    # تحويل الخريطة إلى كود HTML وعرضها بطريقة مضمونة 100% لا تتوقف أبداً
+    # عرض الخريطة بطريقة مستقرة
     map_html = m._repr_html_()
     components.html(map_html, height=520)
 
@@ -101,6 +129,7 @@ report_text = f"""
 ### 📋 تقرير تفصيلي شامل ومخصص للموقع: {site_name}
 * **الإحداثيات الجغرافية المعتمدة:** `{target_coords[0]}° N, {target_coords[1]}° E`
 * **هدف التحليل والاستكشاف:** {anomaly_type}
+* **نوع خريطة العرض المختارة:** {map_style}
 * **درجة الحساسية المعيارية:** {sensitivity}%
 
 ---
@@ -116,7 +145,7 @@ report_text = f"""
 #### 3. التوصيات الميدانية والخطوات العملية القادمة:
 1. **المسح الميداني المباشر:** يُوصى بشدة بنقل الإحداثيات (`{target_coords[0]}, {target_coords[1]}`) إلى جهاز تحديد مواقع ميداني (GPS) وتغطية المربع عبر خطوط مسح أفقية باستخدام تقنيات المقاومة الكهربائية أو الرادار الأرضي.
 2. **التحقق الجيولوجي:** مراعاة طبيعة التضاريس المحيطة بالنقطة لضمان عدم تداخل القراءات مع الرطوبة السطحية أو التغيرات الطبيعية المعتادة في صخور المنطقة.
-3. **التوثيق وتصدير البيانات:** حفظ إحداثيات البؤر النشطة المحددة في التقرير لمقارنتها بالنتائج الفعلية عند إجراء الفحص الميداني المباشر.
+3. **التوثيق وتصدير البيانات:** حفظ إحداثيات والبؤر النشطة المحددة في التقرير لمقارنتها بالنتائج الفعلية عند إجراء الفحص الميداني المباشر.
 """
 
 st.markdown(report_text)
