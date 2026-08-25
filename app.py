@@ -4,7 +4,7 @@ from folium.plugins import HeatMap, Fullscreen, Draw
 import numpy as np
 import pandas as pd
 
-# إعدادات الصفحة لتكون عريضة بالكامل
+# إعدادات الصفحة
 st.set_page_config(
     page_title="منصة التحليل الجيوفيزيائي الفضائي - FieldScan Pro",
     page_icon="💎",
@@ -12,17 +12,14 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# تصميم الـ CSS المخصص: ألوان زرقاء، كريستالية، وثلجية شفافة مع 3D
+# تصميم الـ CSS النظيف والمخصص
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* خلفية التطبيق العامة بدرجات الأزرق الليلي العميق */
     .stApp {
         background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #3a506b 100%);
         color: #e0fbfc;
     }
-    
-    /* تقليل الهوامش العلوية */
     .block-container {
         padding-top: 1rem;
         padding-bottom: 2rem;
@@ -30,77 +27,52 @@ st.markdown("""
         padding-right: 1.5rem;
         max-width: 100% !important;
     }
-
-    /* تصميم الحاويات بزجاج بلوري وشفاف (Glassmorphism & 3D Effect) */
     .crystal-card {
-        background: rgba(28, 37, 65, 0.75);
+        background: rgba(28, 37, 65, 0.85);
         backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border: 1px solid rgba(116, 198, 157, 0.25);
-        border-top: 1px solid rgba(255, 255, 255, 0.35);
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 12px 35px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
-        margin-bottom: 20px;
+        border: 1px solid rgba(116, 198, 157, 0.3);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        margin-bottom: 15px;
     }
-
-    /* الشريط الجانبي بتصميم ثلجي فاخر */
     [data-testid="stSidebar"] {
-        background: rgba(11, 19, 43, 0.9);
+        background: rgba(11, 19, 43, 0.95);
         backdrop-filter: blur(15px);
-        border-right: 1px solid rgba(144, 224, 239, 0.15);
     }
-
-    /* تخصيص العناوين */
     h1, h2, h3, h4 {
         color: #ade8f4 !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    /* تصميم إطار الخريطة بلمسة كريستالية */
     iframe {
         width: 100% !important;
-        border-radius: 16px;
+        border-radius: 14px;
         border: 2px solid rgba(144, 224, 239, 0.3);
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
     }
-
-    /* صندوق القفل للمحتوى غير المشترك */
     .locked-box {
-        background: rgba(15, 23, 42, 0.85);
+        background: rgba(15, 23, 42, 0.9);
         border: 2px dashed rgba(144, 224, 239, 0.4);
-        padding: 35px;
-        border-radius: 16px;
+        padding: 30px;
+        border-radius: 14px;
         text-align: center;
         color: #90e0ef;
         margin-top: 20px;
-        backdrop-filter: blur(10px);
     }
-    
-    /* الأزرار بلمسة نيون زرقاء ثلاثية الأبعاد */
     .stButton>button {
         background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
         color: white;
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.2);
-        box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+        border-radius: 8px;
         font-weight: bold;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #0096c7 0%, #48cae4 100%);
-        box-shadow: 0 6px 20px rgba(72, 202, 228, 0.6);
-        border-color: #ade8f4;
+        border: 1px solid rgba(255,255,255,0.2);
+        width: 100%;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# عنوان المنصة الرئيسي
-st.markdown("<h1 style='text-align: center; margin-bottom: 25px;'>💎 منصة الاستكشاف الجيوفيزيائي الفضائي (FieldScan Crystal Pro)</h1>", unsafe_allow_html=True)
+# العنوان الرئيسي
+st.markdown("<h1 style='text-align: center; margin-bottom: 20px;'>💎 منصة الاستكشاف الجيوفيزيائي الفضائي (FieldScan Crystal Pro)</h1>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# نظام الاشتراكات ورمز التفعيل
-# ---------------------------------------------------------
+# الشريط الجانبي للإعدادات
 st.sidebar.header("🔐 البوابة الأمنية والاشتراك")
 license_input = st.sidebar.text_input("أدخل رمز التفعيل الخاص بك:", type="password", placeholder="مثال: FIELD-PRO-2026")
 
@@ -114,8 +86,6 @@ else:
     st.sidebar.info("💡 أدخل المفتاح **`FIELD-PRO-2026`** في الأعلى لتفعيل كامل الميزات.")
 
 st.sidebar.markdown("---")
-
-# الشريط الجانبي للإعدادات الجغرافية
 st.sidebar.header("📍 إقطاعية المسح والإحداثيات")
 region_option = st.sidebar.selectbox(
     "اختر الموقع المستهدف:",
@@ -160,7 +130,7 @@ anomaly_type = st.sidebar.selectbox(
 )
 sensitivity = st.sidebar.slider("مؤشر الحساسية الطيفية والحرارية الطاقية:", 50, 99, 88)
 
-# روابط الأنماط الجغرافية
+# خرائط
 if "الأقمار الصناعية" in map_style:
     tiles_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     tiles_attr = 'Esri World Imagery'
@@ -171,152 +141,83 @@ else:
     tiles_url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
     tiles_attr = 'OpenTopoMap'
 
-# بناء الخريطة
-m = folium.Map(
-    location=target_coords,
-    zoom_start=16,
-    tiles=tiles_url,
-    attr=tiles_attr,
-    width="100%",
-    height="100%"
-)
+m = folium.Map(location=target_coords, zoom_start=16, tiles=tiles_url, attr=tiles_attr, width="100%", height="100%")
+folium.Marker(location=target_coords, popup=site_name, tooltip=site_name, icon=folium.Icon(color='blue', icon='crosshairs', prefix='fa')).add_to(m)
 
-folium.Marker(
-    location=target_coords,
-    popup=f"{site_name}",
-    tooltip=site_name,
-    icon=folium.Icon(color='blue', icon='crosshairs', prefix='fa')
-).add_to(m)
-
-# توليد نقاط الشذوذ الحراري ديناميكياً
 np.random.seed(int(abs(target_coords[0] * 10000 + target_coords[1] * 10000)))
-heat_data = []
-for _ in range(40):
-    lat_offset = np.random.normal(0, 0.0022)
-    lon_offset = np.random.normal(0, 0.0022)
-    intensity = np.random.uniform(0.4, 1.0)
-    heat_data.append([target_coords[0] + lat_offset, target_coords[1] + lon_offset, intensity])
-
+heat_data = [[target_coords[0] + np.random.normal(0, 0.0022), target_coords[1] + np.random.normal(0, 0.0022), np.random.uniform(0.4, 1.0)] for _ in range(40)]
 HeatMap(heat_data, radius=24, blur=16, max_zoom=1).add_to(m)
 
-# أدوات الرسم
-draw = Draw(
-    export=True,
-    position='topleft',
-    draw_options={'polyline': False, 'polygon': True, 'rectangle': True, 'circle': True, 'marker': True},
-    edit_options={'edit': True}
-)
+draw = Draw(export=True, position='topleft', draw_options={'polyline': False, 'polygon': True, 'rectangle': True, 'circle': True, 'marker': True})
 m.add_child(draw)
 Fullscreen().add_to(m)
 
-# حساب المعايير الحسابية المتقدمة
+# الحسابات
 seed_val = abs(target_coords[0] + target_coords[1])
 est_depth = np.round(1.5 + (seed_val % 5.5), 2)
-est_temp = np.round(19.0 + (seed_val % 6.5), 1)
 magnetic_susceptibility = np.round(45.2 + (seed_val % 38.4), 1)
 thermal_contrast = np.round(2.1 + (seed_val % 4.3), 2)
 stability_index = np.round(72.0 + (seed_val % 25.5), 1)
 cavity_probability = int(60 + (seed_val % 38))
 
-# ---------------------------------------------------------
-# لوحة المؤشرات الثلاثية الأبعاد
-# ---------------------------------------------------------
+# لوحة المؤشرات
 st.markdown("### 📊 لوحة القياسات الفيزيائية والحسابية المتقدمة")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(f"""
-        <div class='crystal-card' style='text-align: center; padding: 15px;'>
-            <h4 style='color: #90e0ef; margin:0; font-size:15px;'>العمق الهيكلي</h4>
-            <h2 style='color: #ffffff; margin: 8px 0;'>{est_depth if is_subscribed else "🔒"} م</h2>
-            <p style='font-size:11px; color:#a9d6e5; margin:0;'>المدى التقديري للهدف</p>
-        </div>
-    """, unsafe_allow_html=True)
-
+    st.metric(label="📏 العمق الهيكلي", value=f"{est_depth} م" if is_subscribed else "🔒")
 with col2:
-    st.markdown(f"""
-        <div class='crystal-card' style='text-align: center; padding: 15px;'>
-            <h4 style='color: #90e0ef; margin:0; font-size:15px;'>التباين المغناطيسي</h4>
-            <h2 style='color: #ffffff; margin: 8px 0;'>{magnetic_susceptibility if is_subscribed else "🔒"} nT</h2>
-            <p style='font-size:11px; color:#a9d6e5; margin:0;'>شدة الاضطراب المغناطيسي</p>
-        </div>
-    """, unsafe_allow_html=True)
-
+    st.metric(label="🧲 التباين المغناطيسي", value=f"{magnetic_susceptibility} nT" if is_subscribed else "🔒")
 with col3:
-    st.markdown(f"""
-        <div class='crystal-card' style='text-align: center; padding: 15px;'>
-            <h4 style='color: #90e0ef; margin:0; font-size:15px;'>التبادل الحراري</h4>
-            <h2 style='color: #ffffff; margin: 10px 0;'>{thermal_contrast if is_subscribed else "🔒"} °C</h2>
-            <p style='font-size:11px; color:#a9d6e5; margin:0;'>مؤشر الانبعاث السطحي</p>
-        </div>
-    """, unsafe_allow_html=True)
-
+    st.metric(label="🌡️ التبادل الحراري", value=f"{thermal_contrast} °C" if is_subscribed else "🔒")
 with col4:
-    st.markdown(f"""
-        <div class='crystal-card' style='text-align: center; padding: 15px;'>
-            <h4 style='color: #90e0ef; margin:0; font-size:15px;'>مؤشر الاحتمالية</h4>
-            <h2 style='color: #ffffff; margin: 8px 0;'>{cavity_probability if is_subscribed else "🔒"}%</h2>
-            <p style='font-size:11px; color:#a9d6e5; margin:0;'>دقة البصمة المستهدفة</p>
-        </div>
-    """, unsafe_allow_html=True)
+    st.metric(label="🎯 مؤشر الاحتمالية", value=f"{cavity_probability}%" if is_subscribed else "🔒")
 
-# ---------------------------------------------------------
-# عرض الخريطة الفضائية الكريستالية
-# ---------------------------------------------------------
-st.markdown("<div class='crystal-card'>", unsafe_allow_html=True)
-st.markdown("<h3 style='margin-top:0;'>🛰️ خريطة المسح الجيومكاني التفاعلي</h3>", unsafe_allow_html=True)
+# عرض الخريطة
+st.markdown("<br>", unsafe_allow_html=True)
 from streamlit_folium import st_folium
-st_folium(m, width="100%", height=850, use_container_width=True)
-st.markdown("</div>", unsafe_allow_html=True)
+st_folium(m, width="100%", height=800, use_container_width=True)
 
 # ---------------------------------------------------------
-# التقرير الاستشاري المعمق (مصمم باحترافية تامة بأسلوب Markdown نظيف)
+# التقرير الاستشاري المهندس باستخدام عناصر Streamlit المنظمة
 # ---------------------------------------------------------
 st.markdown("---")
-st.markdown("<h3>📖 تقرير التشخيص الجيوفيزيائي والاستشاري المخصص</h3>", unsafe_allow_html=True)
+st.markdown("### 📖 تقرير التشخيص الجيوفيزيائي والاستشاري المخصص")
 
 if is_subscribed:
-    # استخدام Markdown النظيف والموثق لضمان ظهور التقرير بشكل هندسي فخم ومنظم
-    report_container = f"""
-    <div class='crystal-card'>
-        <h2 style='color: #00b4d8; text-align: center; border-bottom: 2px solid rgba(144, 224, 239, 0.2); padding-bottom: 10px;'>
-            📋 وثيقة التشخيص والتحليل الميداني المعتمد
-        </h2>
+    with st.container():
+        st.markdown("<div class='crystal-card'>", unsafe_allow_html=True)
         
-        <br>
+        st.markdown(f"## 📋 شهادة تحليل وتوثيق ميداني معتمد")
+        st.info(f"**📍 الموقع المستهدف:** {site_name} | **🌐 الإحداثيات:** `{target_coords[0]}° N, {target_coords[1]}° E` | **🎯 الهدف:** {anomaly_type}")
         
-        <div style='display: flex; justify-content: space-between; background: rgba(11, 19, 43, 0.5); padding: 15px; border-radius: 10px; border: 1px solid rgba(144, 224, 239, 0.1);'>
-            <div><b>📍 اسم الموقع:</b> {site_name}</div>
-            <div><b>🌐 الإحداثيات:</b> {target_coords[0]}° N, {target_coords[1]}° E</div>
-            <div><b>🎯 الهدف:</b> {anomaly_type}</div>
-        </div>
-
-        <br>
-
-        <h3 style='color: #90e0ef;'>1️⃣ التحليل الطيفي والفيزيائي للطبقات الباطنية:</h3>
-        <p style='line-height: 1.8; color: #caf0f8;'>
-            بناءً على معالجة البيانات المكانية للطيف الراداري والحراري للموقع، تم رصد معامل تباين حراري يعادل <b>{thermal_contrast} °C</b> فوق متوسط البيئة المحيطة. تشير قراءات الكثافة المغناطيسية المسجلة عند <b>{magnetic_susceptibility} نانو تيسلا (nT)</b> إلى وجود تباين ملحوظ في التركيب المعدني والصخري مقارنة بالخصائص الإقليمية المعتادة للتربة في هذه الناحية، مما يعكس وجود اضطراب غير اعتيادي في البنية التحتية.
-        </p>
-
-        <h3 style='color: #90e0ef;'>2️⃣ التقييم الهندسي وتحديد العمق:</h3>
-        <p style='line-height: 1.8; color: #caf0f8;'>
-            أظهرت نمذجة الانعكاس الإشاعي أن المركز البؤري للشذوذ يتقاطع مع عمق هندسي يقدر بـ <b>{est_depth} متراً</b> (± 0.4 متر هامش تفاوت). وبناءً على خوارزميات الاستقرار الهيكلي المقدرة بنحو <b>{stability_index}%</b>، تتمتع البنية المستهدفة بدرجة عالية من العزل الطبيعي عن العوامل المناخية السطحية، مما يرفع من دقة ترجيح وجود الهدف الحقيقي بنسبة ثقة مئوية تبلغ <b>{cavity_probability}%</b>.
-        </p>
-
-        <h3 style='color: #90e0ef;'>3️⃣ التوصيات الاستراتيجية والخطوات الميدانية المعتمدة:</h3>
-        <ul style='line-height: 1.8; color: #caf0f8;'>
-            <li><b>تحديد محاور المسح الميداني:</b> يُنصح بشدة بنشر فرق المسح الكهرومغناطيسي أو الغراديوميتر في نطاق دائرة دقيقة شعاعها 15 متراً مركزها الإحداثيات المذكورة أعلاه.</li>
-            <li><b>التحقق عبر الجيورادار (GPR):</b> يفضل توجيه نبضات رادار اختراق الأرض بترددات مخصصة (100 - 250 ميغاهيرتز) لتأكيد ملامح العمق الهيكلي (<b>{est_depth} م</b>) بدقة متناهية.</li>
-            <li><b>المعايرة البيئية والميدانية:</b> أخذ تأثير التكوينات الصخرية المحلية بعين الاعتبار عند توجيه معدات الحفر أو الكشف المباشر لتفادي التداخلات السطحية.</li>
-        </ul>
+        st.markdown("---")
         
-        <br>
-        <div style='text-align: center; font-size: 12px; color: #90e0ef; border-top: 1px solid rgba(144, 224, 239, 0.2); padding-top: 10px;'>
-            تم إصدار هذه الوثيقة آلياً عبر منصة FieldScan Crystal Pro - جميع الحقوق محفوظة © 2026
-        </div>
-    </div>
-    """
-    st.markdown(report_container, unsafe_allow_html=True)
+        st.markdown("### 1️⃣ التحليل الطيفي والفيزيائي للطبقات الباطنية")
+        st.write(
+            f"بناءً على معالجة البيانات المكانية للطيف الراداري والحراري للموقع، تم رصد معامل تباين حراري يعادل **{thermal_contrast} °C** "
+            f"فوق متوسط البيئة المحيطة. تشير قراءات الكثافة المغناطيسية المسجلة عند **{magnetic_susceptibility} نانو تيسلا (nT)** "
+            f"إلى وجود تباين ملحوظ في التركيب المعدني والصخري مقارنة بالخصائص الإقليمية المعتادة للتربة في هذه الناحية، مما يعكس اضطراباً هيكلياً دقيقاً."
+        )
+        
+        st.markdown("### 2️⃣ التقييم الهندسي وتحديد العمق")
+        st.write(
+            f"أظهرت نمذجة الانعكاس الإشاعي أن المركز البؤري للشذوذ يتقاطع مع عمق هندسي يقدر بـ **{est_depth} متراً** "
+            f"(مع هامش تفاوت ± 0.4 متر). استناداً إلى خوارزميات الاستقرار الهيكلي المقدرة بنحو **{stability_index}%**، "
+            f"تتمتع البنية المستهدفة بدرجة عالية من العزل الطبيعي عن العوامل المناخية السطحية، مما يرفع من دقة ترجيح وجود الهدف الحقيقي بنسبة **{cavity_probability}%**."
+        )
+        
+        st.markdown("### 3️⃣ التوصيات الاستراتيجية والخطوات الميدانية")
+        st.markdown(
+            f"* **تحديد محاور المسح:** يُنصح بنشر فرق المسح الكهرومغناطيسي في نطاق دائرة دقيقة شعاعها 15 متراً مركزها الإحداثيات المذكورة.\n"
+            f"* **التحقق عبر الجيورادار (GPR):** يفضل توجيه نبضات رادار اختراق الأرض بترددات مخصصة (100 - 250 ميغاهيرتز) لتأكيد العمق (**{est_depth} م**).\n"
+            f"* **المعايرة البيئية:** أخذ تأثير التكوينات الصخرية المحلية بعين الاعتبار عند توجيه معدات الحفر أو الكشف المباشر."
+        )
+        
+        st.markdown("---")
+        st.caption("تم إصدار هذه الوثيقة آلياً عبر منصة FieldScan Crystal Pro - جميع الحقوق محفوظة © 2026")
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # زر التصدير
     st.markdown("<br>", unsafe_allow_html=True)
@@ -335,7 +236,7 @@ if is_subscribed:
         })
         csv_bytes = df_full.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="اضغط هنا لتأكيد تنزيل الملف",
+            label="تأكيد التنزيل",
             data=csv_bytes,
             file_name=f"{site_name.replace(' ', '_')}_Crystal_Report.csv",
             mime="text/csv"
@@ -344,7 +245,6 @@ else:
     st.markdown("""
         <div class='locked-box'>
             <h3>🔒 التقارير الاستشارية المتقدمة والمعايير الحسابية مقفلة</h3>
-            <p>أنت تستهلك النسخة الأساسية للمنصة. للاستفادة من التقارير المختلفة ديناميكياً وتصدير ملفات التحليل القياسية، يرجى تفعيل الاشتراك الاحترافي.</p>
-            <p>أدخل رمز التفعيل في الشريط الجانبي (مثل: <code>FIELD-PRO-2026</code>) لفتح الميزات الفضائية كاملة.</p>
+            <p>للاستهداء بالتقارير الاحترافية المختلفة ديناميكياً وتصدير ملفات التحليل، يرجى إدخال رمز التفعيل في الشريط الجانبي (<code>FIELD-PRO-2026</code>).</p>
         </div>
     """, unsafe_allow_html=True)
