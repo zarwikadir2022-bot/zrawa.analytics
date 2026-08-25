@@ -1,22 +1,21 @@
 import streamlit as st
 import folium
 from folium.plugins import HeatMap, Fullscreen, Draw
-import streamlit.components.v1 as components
 import numpy as np
 import pandas as pd
 
-# إعدادات الصفحة لتكون عريضة
+# إعدادات الصفحة لتكون عريضة بالكامل
 st.set_page_config(
     page_title="منصة التحليل الجيوفيزيائي - FieldScan",
     page_icon="🗺️",
     layout="wide"
 )
 
-# تعديل تصميم CSS لتوسيع مساحة التطبيق وإزالة الهوامش الفارغة لجعل الخريطة عملاقة
+# تعديل تصميم CSS لتوسيع مساحة التطبيق وزيادة مساحة الخريطة لتصبح عملاقة
 st.markdown("""
     <style>
     .block-container {
-        padding-top: 0.5rem;
+        padding-top: 0.3rem;
         padding-bottom: 0rem;
         padding-left: 0.5rem;
         padding-right: 0.5rem;
@@ -24,6 +23,8 @@ st.markdown("""
     }
     iframe {
         width: 100% !important;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -83,7 +84,9 @@ m = folium.Map(
     location=target_coords,
     zoom_start=16,
     tiles=tiles_url,
-    attr=tiles_attr
+    attr=tiles_attr,
+    width="100%",
+    height="100%"
 )
 
 folium.Marker(
@@ -129,12 +132,12 @@ with m_col3:
 with m_col4:
     st.metric(label="🌡️ البصمة الحرارية", value=f"{est_temp} °C")
 
-# عرض الخريطة بارتفاع عملاق جداً (850 بكسل) تملأ الشاشة بالكامل
-map_html = m._repr_html_()
-components.html(map_html, height=850, scrolling=True)
+# عرض الخريطة بأبعاد عملاقة جداً (920 بكسل لتملأ الشاشة بوضوح تام)
+from streamlit_folium import st_folium
+st_folium(m, width="100%", height=920, use_container_width=True)
 
 # ---------------------------------------------------------
-# استرجاع التقرير النصي المعمق والكامل كما طلبته تماماً
+# التقرير النصي المعمق والكامل
 # ---------------------------------------------------------
 st.markdown("---")
 st.subheader("📖 تقرير التحليل النصي المعمق والتشخيص الجيوفيزيائي الديناميكي")
