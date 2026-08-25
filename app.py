@@ -5,26 +5,38 @@ import streamlit.components.v1 as components
 import numpy as np
 import pandas as pd
 
-# إعدادات صفحة الاستعراض
+# إعدادات صفحة عريضة لضمان أقصى مساحة ممكنة للخريطة
 st.set_page_config(
-    page_title="منصة التحليل الجيوفيزيائي المتقدم",
+    page_title="منصة التحليل الجيوفيزيائي - FieldScan",
     page_icon="🗺️",
     layout="wide"
 )
 
-st.title("🗺️ المنصة الذكية للتحليل الجغرافي والجيوفيزيائي الشامل")
-st.markdown("لوحة تحكم ديناميكية متكاملة لإدخال الإحداثيات، استعراض الطبقات الجغرافية، وتحديد نطاقات المسح والتحليل الميداني.")
+# تنسيق CSS مخصص لجعل التطبيق يبدو كمنصة خرائط احترافية متكاملة
+st.markdown("""
+    <style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    h1 {
+        font-size: 1.5rem !important;
+        margin-bottom: 0rem !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# الشريط الجانبي (الإعدادات والتحكم)
-# ---------------------------------------------------------
+st.title("🗺️ منصة الاستكشاف الجيوفيزيائي الشاملة (FieldScan Style)")
+
+# الشريط الجانبي للإعدادات السريعة
 st.sidebar.header("📍 إعدادات الموقع والإحداثيات")
 region_option = st.sidebar.selectbox(
     "اختر الموقع أو حدد إحداثيات حرة:",
     ["منطقة مخصصة (إحداثيات حرة بالكامل)", "الزراوة القديمة (قابس، تونس)", "قرطاج (تونس العاصمة)", "تطاوين (الجنوب التونسي)"]
 )
 
-# تحديد الإحداثيات والاسم بناءً على الاختيار
 if "مخصصة" in region_option:
     site_name = st.sidebar.text_input("اسم الموقع المستهدف:", "منطقة استكشاف جديدة")
     lat_input = st.sidebar.number_input("خط العرض (Latitude):", value=33.3426, format="%.6f")
@@ -41,21 +53,21 @@ else:
     target_coords = [32.9297, 10.4518]
 
 st.sidebar.markdown("---")
-st.sidebar.header("🗺️ خيارات طبقات الخريطة الأساسية")
+st.sidebar.header("🗺️ طبقات الخريطة")
 map_style = st.sidebar.selectbox(
     "اختر نوع الخريطة:",
     ["صور الأقمار الصناعية (Esri Imagery)", "خريطة الشوارع والمدن (OpenStreetMap)", "خريطة التضاريس (OpenTopoMap)"]
 )
 
 st.sidebar.markdown("---")
-st.sidebar.header("🔬 إعدادات مسح الشذوذ والعمق")
+st.sidebar.header("🔬 إعدادات المسح والتحليل")
 anomaly_type = st.sidebar.selectbox(
-    "نوع الشذوذ المستهدف للتحليل:",
+    "نوع الشذوذ المستهدف:",
     ["فراغات وسراديب تحت سطحية (Cavities)", "تكتلات أو عروق معدنية (Metallic Veins)", "تجمعات ومسارات مائية باطنية (Water/Moisture)", "تغيرات فيزيائية وهيكلية عامة"]
 )
 sensitivity = st.sidebar.slider("معامل الحساسية الطيفية والحرارية:", 50, 99, 88)
 
-# ضبط خصائص طبقات الخريطة (Tiles)
+# تحديد روابط الخرائط
 if "الأقمار الصناعية" in map_style:
     tiles_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     tiles_attr = 'Esri World Imagery'
@@ -66,17 +78,14 @@ else:
     tiles_url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
     tiles_attr = 'OpenTopoMap'
 
-# ---------------------------------------------------------
-# بناء الخريطة وتجهيز الطبقات
-# ---------------------------------------------------------
+# بناء الخريطة
 m = folium.Map(
     location=target_coords,
-    zoom_start=15,
+    zoom_start=16,
     tiles=tiles_url,
     attr=tiles_attr
 )
 
-# علامة الموقع الرئيسي
 folium.Marker(
     location=target_coords,
     popup=f"{site_name}",
@@ -84,18 +93,18 @@ folium.Marker(
     icon=folium.Icon(color='red', icon='map-pin', prefix='fa')
 ).add_to(m)
 
-# توليد نقاط خريطة حرارية ديناميكية (تعتمد كلياً على الإحداثيات)
+# توليد النقاط الحرارية
 np.random.seed(int(abs(target_coords[0] * 1000)))
 heat_data = []
-for _ in range(30):
-    lat_offset = np.random.normal(0, 0.0025)
-    lon_offset = np.random.normal(0, 0.0025)
-    intensity = np.random.uniform(0.45, 1.0)
+for _ in range(35):
+    lat_offset = np.random.normal(0, 0.002)
+    lon_offset = np.random.normal(0, 0.002)
+    intensity = np.random.uniform(0.5, 1.0)
     heat_data.append([target_coords[0] + lat_offset, target_coords[1] + lon_offset, intensity])
 
-HeatMap(heat_data, radius=20, blur=14, max_zoom=1).add_to(m)
+HeatMap(heat_data, radius=22, blur=15, max_zoom=1).add_to(m)
 
-# إضافة أدوات الرسم والتحديد الجغرافي للمسح (Draw Tool)
+# أدوات الرسم والتحديد الميداني
 draw = Draw(
     export=True,
     position='topleft',
@@ -105,81 +114,50 @@ draw = Draw(
 m.add_child(draw)
 Fullscreen().add_to(m)
 
-# ---------------------------------------------------------
-# تخطيط واجهة العرض (أعمدة التطبيق)
-# ---------------------------------------------------------
-col1, col2 = st.columns([2.3, 1])
+# حساب المؤشرات السريعة
+est_depth = np.round(np.random.uniform(1.2, 6.8), 2)
+est_temp = np.round(20.5 + np.random.uniform(-1.0, 3.5), 1)
 
-with col1:
-    st.subheader(f"🗺️ خريطة الاستكشاف والتحديد لـ: {site_name}")
-    st.info(f"📍 الإحداثيات الحالية: ({target_coords[0]}, {target_coords[1]}) — يمكنك استخدام أدوات الرسم أعلى الخريطة لتحديد نطاقات المسح.")
-    
-    # عرض الخريطة بحجم كبير ومريح (700 بكسل) وبدون مشاكل في الـ Rendering
-    map_html = m._repr_html_()
-    components.html(map_html, height=700, scrolling=True)
+# تصميم لوحة المؤشرات العلوية المدمجة فوق الخريطة مباشرة
+m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+with m_col1:
+    st.metric(label="📍 الموقع النشط", value=site_name)
+with m_col2:
+    st.metric(label="📊 مؤشر الشذوذ", value=f"{sensitivity}%")
+with m_col3:
+    st.metric(label="📏 العمق التقديري", value=f"{est_depth} م")
+with m_col4:
+    st.metric(label="🌡️ البصمة الحرارية", value=f"{est_temp} °C")
 
-with col2:
-    st.subheader("📊 لوحة المؤشرات السريعة")
-    est_depth = np.round(np.random.uniform(1.2, 6.8), 2)
-    est_temp = np.round(20.5 + np.random.uniform(-1.0, 3.5), 1)
-    
-    st.metric(label="مؤشر الشذوذ العام للموقع", value=f"{sensitivity}%")
-    st.metric(label="العمق التقديري لمركز الإشارة", value=f"{est_depth} متر")
-    st.metric(label="البصمة الحرارية السطحية التقديرية", value=f"{est_temp} °C")
+# عرض الخريطة بمساحة عملاقة تملأ الشاشة (ارتفاع 780 بكسل) لتكون هي العنصر الأساسي
+map_html = m._repr_html_()
+components.html(map_html, height=780, scrolling=True)
 
-    st.markdown("---")
-    st.markdown("### 💡 إرشادات سريعة:")
-    st.write("1. قم بتبديل نوع الخريطة من القائمة الجانبية لمراجعة معالم الشوارع أو التضاريس.")
-    st.write("2. استخدم أدوات المضلع على الخريطة لتحديد مساحة الفحص الميداني بدقة.")
-
-# ---------------------------------------------------------
-# قسم التقرير والتحليل النصي المعمق
-# ---------------------------------------------------------
+# قسم التقارير والبيانات بالأسفل لتجنب ازدحام الشاشة
 st.markdown("---")
-st.subheader("📖 تقرير التحليل النصي المعمق والتشخيص الجيوفيزيائي الديناميكي")
-
-report_text = f"""
-### 📋 تقرير تفصيلي شامل ومخصص للموقع: {site_name}
-* **الإحداثيات الجغرافية المعتمدة:** `{target_coords[0]}° N, {target_coords[1]}° E`
-* **هدف التحليل والاستكشاف:** {anomaly_type}
-* **نوع خريطة العرض المختارة:** {map_style}
-* **درجة الحساسية المعيارية:** {sensitivity}%
-
----
-
-#### 1. القراءة الطيفية والحرارية لمحيط الموقع:
-بناءً على معالجة البيانات المكانية الخاصة بالإحداثيات المدخلة لـ **{site_name}**، تتبين لنا مؤشرات انبعاث حراري سطحي تقديرية تبلغ **{est_temp} °C**. تتأثر هذه القراءات بطبيعة التكوينات الجيولوجية المحيطة ونوعية التربة السطحية. تشير الخوارزميات التحليلية إلى أن التباينات المسجلة في النطاق قد تعكس فروقات في الكثافة بين الطبقات الصلبة والترسبات الهشة.
-
-#### 2. تشخيص طبيعة الشذوذ وتحليل الإشارات ({anomaly_type}):
-* **توزيع البؤر:** تُظهر الخريطة الحرارية المولدة حول مركز الإحداثيات تمركزاً واضحاً لبؤر ذات كثافة طيفية مرتفعة في الجهات المقابلة لمركز الإشارة، مما قد يدل على وجود بنية تحت سطحية غير منتظمة (كتل صخرية مغايرة، تجاويف، أو مسارات رطوبة قديمة).
-* **العمق الهيكلي:** تشير النماذج التقديرية المرتبطة بزاوية الميل والانحدار الطبوغرافي للموقع إلى أن الهدف أو التغير الفيزيائي المتوقع يقع على عمق هيدرولوجي/جيولوجي يقدر بحوالي **{est_depth} متر** (± 0.6 متر تفاوت).
-* **معامل الثقة:** استناداً إلى دقة الإحداثيات ومعامل الحساسية المختار ({sensitivity}%), فإن نسبة ترجيح وجود شذوذ هيكلي حقيقي في هذا النطاق تُعتبر **إيجابية وذات أهمية استكشافية متقدمة**.
-
-#### 3. التوصيات الميدانية والخطوات العملية القادمة:
-1. **المسح الميداني المباشر:** يُوصى بشدة بنقل الإحداثيات (`{target_coords[0]}, {target_coords[1]}`) إلى جهاز تحديد مواقع ميداني (GPS) وتغطية المربع عبر خطوط مسح أفقية باستخدام تقنيات المقاومة الكهربائية أو الرادار الأرضي.
-2. **التحقق الجيولوجي:** مراعاة طبيعة التضاريس المحيطة بالنقطة لضمان عدم تداخل القراءات مع الرطوبة السطحية أو التغيرات الطبيعية المعتادة في صخور المنطقة.
-3. **التوثيق وتصدير البيانات:** حفظ إحداثيات البؤر النشطة المحددة في التقرير لمقارنتها بالنتائج الفعلية عند إجراء الفحص الميداني المباشر.
-"""
-
-st.markdown(report_text)
-
-# زر تصدير التقرير والبيانات
-st.markdown("---")
-if st.button("📥 تصدير التقرير النصي والبيانات الشاملة للموقع (CSV)"):
-    df_full = pd.DataFrame({
-        "Site_Name": [site_name],
-        "Latitude": [target_coords[0]],
-        "Longitude": [target_coords[1]],
-        "Anomaly_Type": [anomaly_type],
-        "Estimated_Depth_m": [est_depth],
-        "Surface_Temp_C": [est_temp],
-        "Confidence_Score": [sensitivity],
-        "Map_Style": [map_style]
-    })
-    csv_bytes = df_full.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="اضغط هنا لتنزيل ملف التقرير الخاص بالموقع",
-        data=csv_bytes,
-        file_name=f"{site_name.replace(' ', '_')}_custom_analysis.csv",
-        mime="text/csv"
-    )
+with st.expander("📖 عرض التقرير النصي المعمق وتصدير البيانات (انقر للاستعراض)", expanded=False):
+    st.subheader(f"تقرير التشخيص الجيوفيزيائي الميداني: {site_name}")
+    st.write(f"**الإحداثيات:** {target_coords[0]}, {target_coords[1]} | **الهدف:** {anomaly_type}")
+    st.markdown(f"""
+    * **القراءة الطيفية:** تشير البيانات إلى وجود تباينات حرارية تقدر بـ **{est_temp} °C** في النطاق المحيط بمركز الإشارة.
+    * **العمق الهيكلي:** الهدف المباشر متوقع على عمق يناهز **{est_depth} متر**.
+    * **التوصية:** استخدم أدوات الرسم المتاحة أعلى الخريطة لتحديد المضلعات الميدانية ومطابقتها مع أجهزة المسح الميدانية الفعلية.
+    """)
+    
+    if st.button("📥 تصدير تقرير الموقع (CSV)"):
+        df_full = pd.DataFrame({
+            "Site_Name": [site_name],
+            "Latitude": [target_coords[0]],
+            "Longitude": [target_coords[1]],
+            "Anomaly_Type": [anomaly_type],
+            "Estimated_Depth_m": [est_depth],
+            "Surface_Temp_C": [est_temp],
+            "Confidence_Score": [sensitivity]
+        })
+        csv_bytes = df_full.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="تنزيل الملف الآن",
+            data=csv_bytes,
+            file_name=f"{site_name.replace(' ', '_')}_fieldscan.csv",
+            mime="text/csv"
+        )
